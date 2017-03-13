@@ -98,17 +98,14 @@ void parallel_bubble_sort (int *T, const int size)
 	int chunksize = 16;
 	for(j = 0; j < size; j++){
 	  
-	  bool check = true;
-	  #pragma omp parallel for schedule (static) private (i,k) lastprivate(check)
+	  #pragma omp parallel for schedule (static) private (i,k)
 	  for(i = 0; i < size - 1; i++){
 		if(T[i] > T[i + 1]){
 		  k = T[i+1];
 		  T[i+1] = T[i];
 		  T[i] = k;
-		  check = false;
 		}
 	  }
-	  bool check2 = true; 
 	  #pragma omp single
 	  {
 		for(int m=1;m<size/chunksize; m++){
@@ -116,16 +113,12 @@ void parallel_bubble_sort (int *T, const int size)
 			int s = T[(j * chunksize)-1];
 			T[(m * chunksize)-1] = T[(m * chunksize)];
 			T[(m * chunksize)] = s;
-			check2 = false;
+			//check2 = false;
 		  }
 		  
 		} 
 	  }
 	  #pragma omp barrier
-	  if(check == true && check2==true){
-			//printf("Breaking\n");
-			break;
-		}
 	}
 	//print_array(T);
   return ;
