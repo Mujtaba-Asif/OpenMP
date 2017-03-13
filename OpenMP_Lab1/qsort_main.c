@@ -72,16 +72,7 @@ static int compare (const void *x, const void *y)
     /* TODO: comparison function to be used by qsort()*/
 
     /* cast x and y to int* before comparing */
-    int *new_x = (int *) x;
-    int *new_y = (int *) y;
-    if(new_x < new_y){
-      return 1;
-    } else if(new_x > new_y)
-    {
-      return -1;
-    }else{
-      return 0;
-    }
+    return ( *(int*)x - *(int*)y );
 }
 
 void sequential_qsort_sort (int *T, const int size)
@@ -149,11 +140,13 @@ void parallel_qsort_sort (int *T, const int size)
     /* TODO: parallel sorting based on libc qsort() function +
      * sequential merging */
     register int i;
-    int div = 16;
+    int div = 8;
     int chuncksize = size / div;
-    
-    for(i=0; i<=size/chuncksize;i++){
-        #pragma omp task
+    //printf("%d\n", chuncksize);
+    #pragma omp parallel
+    {
+    for(i=0; i<size/chuncksize;i++){
+        
         qsort((void *)(T + (i *chuncksize)), chuncksize, sizeof(int), compare);
     }
 
@@ -163,6 +156,7 @@ void parallel_qsort_sort (int *T, const int size)
           merge(T,(i*chuncksize));
       }
     }
+  }
 }
 
 void parallel_qsort_sort1 (int *T, const int size)
@@ -171,16 +165,17 @@ void parallel_qsort_sort1 (int *T, const int size)
     /* TODO: parallel sorting based on libc qsort() function +
      * PARALLEL merging */
   register int i;
-    int div = 16;
+    int div = 8;
     int chuncksize = size / div;
     
-    for(i=0; i<=size/chuncksize;i++){
+    for(i=0; i<size/chuncksize;i++){
         #pragma omp task
         qsort((void *)(T + (i *chuncksize)), chuncksize, sizeof(int), compare);
     }
 
     for(int j=0 ; j <= div/2; j++)
     {  
+      #pragma omp task
       for(i=0; i < size/chuncksize;i++){
           #pragma omp task
           merge(T,(i*chuncksize));

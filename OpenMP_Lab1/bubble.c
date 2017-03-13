@@ -27,9 +27,9 @@ long long unsigned int average (long long unsigned int *exps)
   long long unsigned int s = 0 ;
 
   for (i = 2; i < (NBEXPERIMENTS-2); i++)
-    {
-      s = s + exps [i] ;
-    }
+	{
+	  s = s + exps [i] ;
+	}
 
   return s / (NBEXPERIMENTS-2) ;
 }
@@ -39,9 +39,9 @@ void init_array (array_int T)
   register int i ;
 
   for (i = 0 ; i < N ; i++)
-    {
-      T [i] = N - i ;
-    }
+	{
+	  T [i] = N - i ;
+	}
 }
 
 void print_array (array_int T)
@@ -49,9 +49,9 @@ void print_array (array_int T)
   register int i ;
 
   for (i = 0 ; i < N ; i++)
-    {
-      printf ("%d ", T[i]) ;
-    }
+	{
+	  printf ("%d ", T[i]) ;
+	}
   printf ("\n") ;
 }
 
@@ -63,81 +63,71 @@ int is_sorted (array_int T)
   register int i ;
   
   for (i = 1 ; i < N ; i++)
-    {
-      if (T[i-1] > T [i])
+	{
+	  if (T[i-1] > T [i])
 	return 0 ;
-    }
+	}
   return 1 ;
 }
 
 void sequential_bubble_sort (int *T, const int size)
 {
-    /* TODO: sequential implementation of bubble sort */ 
+	/* TODO: sequential implementation of bubble sort */ 
 
-    register int i;
-    register int k;
-    while(is_sorted(T) == 0){
-      for(i = 0; i < size - 1; i++){
-        if(T[i] > T[i + 1]){
-          k = T[i+1];
-          T[i+1] = T[i];
-          T[i] = k;
-        }
-      }
+	register int i;
+	register int k;
+	while(is_sorted(T) == 0){
+	  for(i = 0; i < size - 1; i++){
+		if(T[i] > T[i + 1]){
+		  k = T[i+1];
+		  T[i+1] = T[i];
+		  T[i] = k;
+		}
+	  }
    }
-    return ;
+	return ;
 }
 
 void parallel_bubble_sort (int *T, const int size)
 {
-    /* TODO: parallel implementation of bubble sort */
+	/* TODO: parallel implementation of bubble sort */
   
-    register int i;
-    register int j;
-    register int k;
-    int chunksize = 32;
-    //X = (int *) malloc (N * sizeof(int));
-    //init_array(X);
-    //#pragma omp parallel while schedule (dynamic)
-    for(j = 0; j < size; j++){
-      
-      bool check = true;
-      printf("Modified %d\n",j);
-      #pragma omp parallel for schedule (static,chunksize) private (i,k) lastprivate(check)
-      for(i = 0; i < size - 1; i++){
-        if(T[i] > T[i + 1]){
-          k = T[i+1];
-          T[i+1] = T[i];
-          T[i] = k;
-          check = false;
-          //printf("Modified\n");
-
-        }
-      }
-      bool check2 = true; 
-      #pragma omp single 
-      {
-        
-        for(int m=1;m<size/chunksize; m++){
-          if(T[(m * chunksize)-1] > T[(m * chunksize)]){
-            int s = T[(j * chunksize)-1];
-            T[(m * chunksize)-1] = T[(m * chunksize)];
-            T[(m * chunksize)] = s;
-            check2 = false;
-          }
-          
-        }
-        // sorted if all checks are true and no swap in border        
-      }
-      #pragma omp barrier
-      //printf("Iteration = %d, check 1 = %d, check 2 = %d \n",j,check,check2);
-      if(check == true && check2==true){
-            printf("Breaking\n");
-            break;
-        }
-    printf("Passed %d\n",j);
-    }
-    //print_array(T);
+	register int i;
+	register int j;
+	register int k;
+	int chunksize = 16;
+	for(j = 0; j < size; j++){
+	  
+	  bool check = true;
+	  #pragma omp parallel for schedule (static) private (i,k) lastprivate(check)
+	  for(i = 0; i < size - 1; i++){
+		if(T[i] > T[i + 1]){
+		  k = T[i+1];
+		  T[i+1] = T[i];
+		  T[i] = k;
+		  check = false;
+		}
+	  }
+	  bool check2 = true; 
+	  #pragma omp single
+	  {
+		for(int m=1;m<size/chunksize; m++){
+		  if(T[(m * chunksize)-1] > T[(m * chunksize)]){
+			int s = T[(j * chunksize)-1];
+			T[(m * chunksize)-1] = T[(m * chunksize)];
+			T[(m * chunksize)] = s;
+			check2 = false;
+		  }
+		  
+		} 
+	  }
+	  #pragma omp barrier
+	  if(check == true && check2==true){
+			//printf("Breaking\n");
+			break;
+		}
+	}
+	//print_array(T);
   return ;
 }
 
@@ -149,12 +139,12 @@ int main (int argc, char **argv)
   unsigned int exp ;
 
   /* the program takes one parameter N which is the size of the array to
-     be sorted. The array will have size 2^N */
+	 be sorted. The array will have size 2^N */
   if (argc != 2)
-    {
-      fprintf (stderr, "bubble N \n") ;
-      exit (-1) ;
-    }
+	{
+	  fprintf (stderr, "bubble N \n") ;
+	  exit (-1) ;
+	}
 
   N = 1 << (atoi(argv[1])) ;
   X = (int *) malloc (N * sizeof(int)) ;
@@ -167,23 +157,23 @@ int main (int argc, char **argv)
   
 
   for (exp = 0 ; exp < NBEXPERIMENTS; exp++)
-    {
-      init_array (X) ;
-      
-      start = _rdtsc () ;
+	{
+	  init_array (X) ;
+	  
+	  start = _rdtsc () ;
 
-         sequential_bubble_sort (X, N) ;
-     
-      end = _rdtsc () ;
-      experiments [exp] = end - start ;
+		 sequential_bubble_sort (X, N) ;
+	 
+	  end = _rdtsc () ;
+	  experiments [exp] = end - start ;
 
-      /* verifying that X is properly sorted */
-      if (! is_sorted (X))
+	  /* verifying that X is properly sorted */
+	  if (! is_sorted (X))
 	{
 	  fprintf(stderr, "ERROR: the array is not properly sorted\n") ;
 	  exit (-1) ;
 	}
-    }
+	}
 
   av = average (experiments) ;  
 
@@ -191,22 +181,22 @@ int main (int argc, char **argv)
 
   
   for (exp = 0 ; exp < NBEXPERIMENTS; exp++)
-    {
-      init_array (X) ;
-      start = _rdtsc () ;
-
-          parallel_bubble_sort (X, N) ;
-     
-      end = _rdtsc () ;
-      experiments [exp] = end - start ;
-
-      /* verifying that X is properly sorted */
-      if (! is_sorted (X))
 	{
-            fprintf(stderr, "ERROR: the array is not properly sorted\n") ;
-            exit (-1) ;
+	  init_array (X) ;
+	  start = _rdtsc () ;
+
+		  parallel_bubble_sort (X, N) ;
+	 
+	  end = _rdtsc () ;
+	  experiments [exp] = end - start ;
+
+	  /* verifying that X is properly sorted */
+	  if (! is_sorted (X))
+	{
+			fprintf(stderr, "ERROR: the array is not properly sorted\n") ;
+			exit (-1) ;
 	}
-    }
+	}
 
   av = average (experiments) ;  
   printf ("\n bubble parallel \t %Ld cycles\n\n", av-residu) ;
